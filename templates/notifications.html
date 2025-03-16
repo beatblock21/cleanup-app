@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="notifications-container">
+    <h2>Your Notifications</h2>
+    <div class="notifications-list">
+        <ul>
+            {% for notification in notifications %}
+                <li class="notification-item {% if not notification.is_read %}unread{% endif %}">
+                    <div class="notification-message">
+                        <span class="message">{{ notification.message }}</span>
+                        <span class="timestamp">{{ notification.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                    </div>
+                    <form action="{{ url_for('main.notifications', notification_id=notification.id) }}" method="POST">
+                        {{ form.hidden_tag() }}  <!-- Include the CSRF token -->
+                        <button type="submit" class="mark-read-btn {% if notification.is_read %}read{% else %}unread{% endif %}">Mark as read</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+/* General Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+    background: #f8f9fa;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+}
+
+/* Header */
+header {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    color: #fff;
+}
+
+header nav a {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+header nav a:hover {
+    background-color: #fff;
+    color: #007bff;
+}
+
+/* Footer */
+footer {
+    box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+}
+
+footer a {
+    transition: color 0.3s ease;
+}
+
+footer a:hover {
+    color: #007bff;
+}
+
+/* Buttons */
+.btn-outline-light {
+    border-color: #fff;
+    color: #fff;
+}
+
+.btn-outline-light:hover {
+    background-color: #fff;
+    color: #007bff;
+}
+
+.btn-light {
+    background-color: #fff;
+    color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-light:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Notifications Badge */
+.badge {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+}

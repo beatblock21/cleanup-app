@@ -1,0 +1,42 @@
+<!-- In templates/report_hotspot.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Hotspot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">  <!-- Add your CSS link -->
+</head>
+<body>
+    <div class="container">
+        <h1>Report a Litter Hotspot</h1>
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}  <!-- Include the CSRF token -->
+            <div class="form-group">
+                {{ form.location.label }} 
+                {{ form.location(class="form-control") }}  <!-- Bootstrap classes for styling -->
+                {% for error in form.location.errors %}
+                    <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.description.label }} 
+                {{ form.description(class="form-control") }} 
+                {% for error in form.description.errors %}
+                    <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.image.label }} 
+                {{ form.image(class="form-control") }}  <!-- Add Bootstrap class for consistency -->
+                {% for error in form.image.errors %}
+                    <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <a href="{{ url_for('main.home') }}">Back to Home</a>  <!-- Link back to home or another page -->
+    </div>
+</body>
+</html>

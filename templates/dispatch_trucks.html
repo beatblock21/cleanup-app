@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dispatch Trucks</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyChl9j-HQ8uVlzHcaZkBqTzZTENOHPMTnQ&callback=initMap" async defer></script>
+    <style>
+        /* Modern Design Enhancements */
+        :root {
+            --primary-warm: #ff6f61; /* Warm primary color */
+            --secondary-warm: #ffcc5c; /* Warm secondary color */
+            --soft-gray: #f4f6f7;
+            --text-color: #2c3e50;
+        }
+    
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--soft-gray);
+            color: var(--text-color);
+        }
+    
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 1200px;
+        }
+    
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+    
+        .table thead {
+            background-color: var(--primary-warm);
+            color: white;
+        }
+    
+        .table th, .table td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+    
+        .table tbody tr {
+            border-bottom: 1px solid #e0e4e6;
+            transition: background-color 0.3s ease;
+        }
+    
+        .table tbody tr:hover {
+            background-color: var(--secondary-warm);
+            color: white;
+        }
+    
+        .btn {
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+    
+        .btn-primary {
+            background-color: var(--primary-warm);
+            border: none;
+            color: white;
+        }
+    
+        .btn-primary:hover {
+            background-color: #e65f53;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(255, 111, 97, 0.3);
+        }
+    
+        .btn-secondary {
+            background-color: var(--secondary-warm);
+            color: white;
+        }
+    
+        .btn-secondary:hover {
+            background-color: #e6b852;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(255, 204, 92, 0.3);
+        }
+    
+        input[type="text"] {
+            border-radius: 6px;
+            border: 1px solid #e0e4e6;
+            padding: 8px;
+            transition: border-color 0.3s ease;
+        }
+    
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-warm);
+            box-shadow: 0 0 0 2px rgba(255, 111, 97, 0.2);
+        }
+    
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+    
+        @media (max-width: 768px) {
+            .layout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Available Trucks for Dispatch</h2>
+        
+        <div class="layout-grid">
+            <!-- Table container -->
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Truck ID</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for truck in trucks %}
+                        <tr>
+                            <td>{{ truck.id }}</td>
+                            <td>{{ truck.location if truck.location else 'Not Assigned' }}</td>
+                            <td>
+                                {% if truck.is_dispatched %}
+                                    <span class="icon">&#10004;</span> Dispatched
+                                {% else %}
+                                    <span class="icon">&#10060;</span> Available
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not truck.is_dispatched %}
+                                    <form action="{{ url_for('main.dispatch_trucks') }}" method="POST" style="display: flex; gap: 10px;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="truck_id" value="{{ truck.id }}">
+                                        <input type="text" name="location" placeholder="Enter location" required>
+                                        <button type="submit" class="btn btn-primary">Dispatch</button>
+                                    </form>
+                                {% else %}
+                                    <button class="btn btn-secondary" disabled>Dispatched</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Map container -->
+            <div id="map" style="height: 400px;"></div>
+        </div>
+    </div>
+
+    <script>
+        function initMap() {
+            var nakuru = {lat: -0.3031, lng: 36.0800}; // Nakuru, Kenya coordinates
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: nakuru,
+                zoom: 8
+            });
+
+            var marker = new google.maps.Marker({
+                position: nakuru,
+                map: map,
+                title: 'Dispatch Location'
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+<h2>Recent Sensor Data</h2>
+<ul>
+    {% for d in data %}
+        <li>{{ d.timestamp }} - {{ d.value }}</li>
+    {% endfor %}
+</ul>

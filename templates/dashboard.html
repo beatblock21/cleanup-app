@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h2>Dashboard</h2>
+    <p>Welcome to your dashboard, {{ current_user.username }}!</p>
+
+    <div>
+        <!-- Notification badge -->
+        <a href="{{ url_for('main.notifications') }}">
+            Notifications 
+            <span class="badge">
+                {{ current_user.notifications | selectattr('is_read', 'equalto', False) | list | length }}
+            </span>
+        </a>
+    </div>
+
+    <div>
+        <a href="{{ url_for('main.view_hotspots') }}">View Litter Hotspots</a>
+    </div>
+    <div>
+        <a href="{{ url_for('main.report_hotspots') }}">Report Litter Hotspots</a>
+    </div>
+    <div>
+        <a href="{{ url_for('main.bin_status_reports') }}">Update Bin Status</a>
+    </div>
+</div>
+{% endblock %}

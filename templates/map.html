@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nakuru Map</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+    <h1>Nakuru City Map</h1>
+    <div id="map" style="height: 500px;"></div>
+    
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([-0.5732, 36.0662], 13); // Zoom level for more detail
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+}).addTo(map);
+
+
+        // Add a marker for Nakuru City
+        var marker = L.marker([-0.5732, 36.0662]).addTo(map);
+        marker.bindPopup('Nakuru City').openPopup();
+
+        // Add click event to add a new marker when reporting a hotspot
+        map.on('click', function(e) {
+            var newMarker = L.marker(e.latlng).addTo(map);
+            newMarker.bindPopup('New Litter Hotspot').openPopup();
+
+            // Send the coordinates to the backend
+            fetch('/report_hotspot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    location: e.latlng // Send latlng object
+                })
+            }).then(response => {
+                if (response.ok) {
+                    alert('Hotspot reported successfully!');
+                } else {
+                    alert('Error reporting hotspot.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

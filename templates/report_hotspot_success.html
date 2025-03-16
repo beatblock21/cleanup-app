@@ -1,0 +1,24 @@
+# Create a new template: templates/report_hotspot_success.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotspot Report Success</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="card text-center">
+            <div class="card-body">
+                <h2 class="card-title text-success mb-4">✓ Hotspot Successfully Reported!</h2>
+                <p class="card-text">Thank you for helping keep our community clean. Your report has been submitted and will be reviewed by our team.</p>
+                <div class="mt-4">
+                    <a href="{{ url_for('main.home') }}" class="btn btn-primary">Return to Home</a>
+                    <a href="{{ url_for('main.report_hotspot') }}" class="btn btn-outline-primary ml-2">Report Another Hotspot</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Hotspot</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyChl9j-HQ8uVlzHcaZkBqTzZTENOHPMTnQ&callback=initMap" async defer></script>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <h2 class="mb-4">Report Litter Hotspot</h2>
+        <form method="POST" action="{{ url_for('main.report_hotspot') }}" enctype="multipart/form-data" style="max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #f5f7fa, #c3cfe2); border-radius: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+            {{ form.hidden_tag() }}  <!-- CSRF token and hidden fields -->
+
+            <div style="margin-bottom: 20px;">
+                <label for="location" style="display: block; margin-bottom: 5px; color: #555;">Location:</label>
+                {{ form.location(style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; transition: border-color 0.3s ease;") }}  <!-- This renders the location field from the form -->
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label for="description" style="display: block; margin-bottom: 5px; color: #555;">Description:</label>
+                {{ form.description(style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; transition: border-color 0.3s ease;") }}  <!-- This renders the description field from the form -->
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label for="image" style="display: block; margin-bottom: 5px; color: #555;">Upload Image:</label>
+                {{ form.image(style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; transition: border-color 0.3s ease;") }}  <!-- This renders the file upload field from the form -->
+            </div>
+
+            <button type="submit" style="display: inline-block; background: linear-gradient(135deg, #4a90e2, #357ab7); color: white; padding: 10px 20px; font-size: 1em; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease;">{{ form.submit.label }}</button>  <!-- Submit button -->
+        </form>
+        <div id="map"></div>
+    </div>
+
+    <script>
+        function initMap() {
+            var nakuru = {lat: -0.3031, lng: 36.0800}; // Nakuru, Kenya coordinates
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: nakuru,
+                zoom: 8
+            });
+
+            var marker = new google.maps.Marker({
+                position: nakuru,
+                map: map,
+                title: 'Hotspot Location'
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-light">
+
+    <!-- Sidebar -->
+    <div class="d-flex" id="wrapper">
+        <div class="bg-dark text-white" id="sidebar">
+            <div class="sidebar-header text-center py-4">
+                <h4>Admin Dashboard</h4>
+                <p class="m-0">{{ current_user.username }}</p>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item bg-dark text-white">
+                    <a href="{{ url_for('main.view_hotspots') }}" class="text-white">Litter Hotspots</a>
+                </li>
+                <li class="list-group-item bg-dark text-white">
+                    <a href="{{ url_for('main.dispatch_trucks') }}" class="text-white">Dispatch Trucks</a>
+                </li>
+                <li class="list-group-item bg-dark text-white">
+                    <a href="http://localhost:8080/" class="text-white">Bin Status Reports</a>
+                </li>
+                <li class="list-group-item bg-dark text-white">
+                    <a href="{{ url_for('main.manage_users') }}" class="text-white">Manage Users</a> <!-- New Link -->
+                </li>
+                <li class="list-group-item bg-dark text-white">
+                    <a href="{{ url_for('main.logout') }}" class="text-white">Logout</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content Area -->
+        <div id="page-content-wrapper" class="container-fluid">
+            <div class="container py-4">
+                <h2 class="mb-4">Welcome to the Admin Dashboard</h2>
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, message in messages %}
+                                {% if category == 'admin' %}
+                                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Section for Key Stats or Actions -->
+                <div class="row">
+                    <!-- Litter Hotspots Card -->
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5>Litter Hotspots</h5>
+                            </div>
+                            <div class="card-body">
+                                <p>Review and manage reported litter hotspots in the community.</p>
+                                <a href="{{ url_for('main.view_hotspots') }}" class="btn btn-primary btn-block">View Hotspots</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dispatch Truck Card -->
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5>Dispatch Truck</h5>
+                            </div>
+                            <div class="card-body">
+                                <p>Manage truck dispatching from the truck management page.</p>
+                                <a href="{{ url_for('main.dispatch_trucks') }}" class="btn btn-success btn-block">Dispatch Truck</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bin Status Monitoring Card -->
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5>Bin Status Monitoring</h5>
+                            </div>
+                            <div class="card-body">
+                                <a href="http://localhost:8080/" class="btn btn-primary btn-block">View Bin Status Reports</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table for Viewing Litter Hotspots with Images -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Reported Litter Hotspots</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Location</th>
+                                    <th>Description</th>
+                                    <th>Date Reported</th>
+                                    <th>Status</th>
+                                    <th>Image</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for hotspot in hotspots %}
+                                <tr>
+                                    <td>{{ hotspot.location }}</td>
+                                    <td>{{ hotspot.description }}</td>
+                                    <td>{{ hotspot.date_reported.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>{{ hotspot.status }}</td>
+                                    <td>
+                                        {% if hotspot.image_url %}
+                                            <img src="{{ hotspot.image_url }}" alt="Evidence" width="100">
+                                        {% else %}
+                                            No Image
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Bin Status Report Table -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5>Bin Status Reports</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Bin ID</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Last Checked</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in bin_status_reports %}
+                                <tr>
+                                    <td>{{ report.bin_id }}</td>
+                                    <td>{{ report.location }}</td>
+                                    <td>{{ report.status }}</td>
+                                    <td>{{ report.last_checked }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

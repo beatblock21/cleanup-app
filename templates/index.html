@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Bin Monitor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .status-indicator {
+            width: 100%;
+            height: 200px;
+            border-radius: 10px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .readings {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 1rem 0;
+            color: #2c3e50;
+        }
+
+        .timestamp {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .status-label {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-top: 1rem;
+            color: #2c3e50;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .alert {
+            animation: pulse 2s infinite;
+        }
+
+        #connectionStatus {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .log-container {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 2rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div id="connectionStatus"></div>
+    <div class="container">
+        <div class="header">
+            <h1>Smart Bin Monitoring System</h1>
+        </div>
+        
+        <div class="dashboard">
+            <div class="card">
+                <h2>Distance Reading</h2>
+                <div class="readings" id="distanceReading">-- cm</div>
+                <div class="status-label">Current Distance</div>
+                <div class="timestamp" id="distanceTimestamp">Last updated: --</div>
+            </div>
+            
+            <div class="card">
+                <h2>Bin Status</h2>
+                <div class="status-indicator" id="statusIndicator">--</div>
+                <div class="status-label" id="binStatus">Unknown</div>
+                <div class="timestamp" id="statusTimestamp">Last updated: --</div>
+            </div>
+        </div>
+
+        <div class="log-container">
+            <h2>Recent Activity</h2>
+            <div id="logEntries"></div>
+        </div>
+    </div>
+
+    <script>
+        function updateDashboard(data) {
+            const timestamp = new Date().toLocaleString();
+            
+            // Update distance reading
+            document.getElementById('distanceReading').textContent = `${data.distance.toFixed(2)} cm`;
+            document.getElementById('distanceTimestamp').textContent = `Last updated: ${timestamp}`;
+
+            // Update bin status
+            const statusIndicator = document.getElementById('statusIndicator');
+            const binStatus = document.getElementById('binStatus');
+            
+            let statusColor;
+            switch(data.bin_status.toUpperCase()) {
+                case 'EMPTY':
+                    statusColor = '#4CAF50';
+                    break;
+                case 'HALF-FULL':
+                    statusColor = '#FFA726';
+                    break;
+                case 'FULL':
+                    statusColor = '#EF5350';
+                    statusIndicator.classList.add('alert');
+                    break;
+                default:
+                    statusColor = '#9E9E9E';
+            }
+
+            statusIndicator.style.backgroundColor = statusColor;
+            binStatus.textContent = data.bin_status;
+            document.getElementById('statusTimestamp').textContent = `Last updated: ${timestamp}`;
+
+            // Add log entry
+            addLogEntry(`Distance: ${data.distance.toFixed(2)} cm | Status: ${data.bin_status} | ${timestamp}`);
+        }
+
+        function addLogEntry(message) {
+            const logContainer = document.getElementById('logEntries');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = message;
+            logContainer.insertBefore(entry, logContainer.firstChild);
+
+            // Keep only last 10 entries
+            while (logContainer.children.length > 10) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connectionStatus');
+            statusElement.style.backgroundColor = connected ? '#4CAF50' : '#EF5350';
+            statusElement.style.color = 'white';
+            statusElement.textContent = connected ? 'Connected' : 'Disconnected';
+        }
+
+        // Simulated WebSocket connection (you'll need to implement this)
+        let ws = null;
+        function connectWebSocket() {
+            try {
+                ws = new WebSocket('ws://localhost:8765');  // Update with your WebSocket server address
+                
+                ws.onopen = () => {
+                    updateConnectionStatus(true);
+                };
+
+                ws.onclose = () => {
+                    updateConnectionStatus(false);
+                    setTimeout(connectWebSocket, 5000);  // Reconnect after 5 seconds
+                };
+
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    updateDashboard(data);
+                };
+            } catch (error) {
+                console.error('WebSocket connection error:', error);
+                updateConnectionStatus(false);
+            }
+        }
+
+        // Initial connection
+        connectWebSocket();
+    </script>
+</body>
+</html>

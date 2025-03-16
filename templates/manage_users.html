@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> <!-- Include Font Awesome -->
+    <style>
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        .btn-action {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <h2 class="mb-4">Manage Users</h2>
+
+        <!-- Search Form -->
+        <form method="GET" action="{{ url_for('main.manage_users') }}" class="mb-4">
+            <div class="input-group">
+                <input type="text" name="search" placeholder="Search users..." value="{{ search_query }}" class="form-control">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Users Table -->
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th> <!-- Added Role column -->
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users.items %}
+                <tr>
+                    <td>
+                        {% if user.role == 'admin' %}
+                            <i class="fas fa-user-tie" style="color: blue;"></i> <!-- Blue person icon for admin -->
+                        {% else %}
+                            <i class="fas fa-user" style="color: grey;"></i> <!-- Grey person icon for normal users -->
+                        {% endif %}
+                        {{ user.username }}
+                    </td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.role }}</td> <!-- Display user role -->
+                    <td>
+                        <a href="{{ url_for('main.edit_user', user_id=user.id) }}" class="btn btn-sm btn-primary btn-action">Edit</a>
+                        <form action="{{ url_for('main.delete_user', user_id=user.id) }}" method="POST" style="display:inline;">
+                            {{ csrf_form.csrf_token }}  <!-- CSRF Token -->
+                            <button type="submit" class="btn btn-sm btn-danger btn-action">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination Links -->
+        <nav aria-label="User pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if users.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('main.manage_users', page=users.prev_num, search=search_query) }}">Previous</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                    </li>
+                {% endif %}
+
+                {% for page_num in users.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num == users.page %}
+                            <li class="page-item active" aria-current="page">
+                                <a class="page-link" href="#">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('main.manage_users', page=page_num, search=search_query) }}">{{ page_num }}</a>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">...</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if users.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('main.manage_users', page=users.next_num, search=search_query) }}">Next</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Bin Monitor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #1a1a1a;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-time {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1a1a1a;
+        }
+
+        .bin-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .status-empty {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-full {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .chart-container {
+            background: #ffffff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            height: 400px;
+        }
+
+        #distanceChart {
+            width: 100%;
+            height: 100%;
+        }
+
+        #debug {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Smart Bin Monitoring System</h1>
+            <div class="status-time">Last Updated: <span id="lastUpdate">-</span></div>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-title">Current Distance</div>
+                <div class="card-value"><span id="currentDistance">-</span> cm</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Bin Status</div>
+                <div class="card-value">
+                    <span id="binStatus" class="bin-status">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="distanceChart"></canvas>
+        </div>
+
+        <!-- Debug section -->
+        <div id="debug"></div>
+    </div>
+
+    <script>
+        let chart;
+        const maxDataPoints = 20;
+        const chartData = {
+            labels: [],
+            datasets: [{
+                label: 'Distance (cm)',
+                data: [],
+                borderColor: '#3b82f6',
+                tension: 0.4,
+                fill: false
+            }]
+        };
+
+        // Initialize Chart
+        function initChart() {
+            const ctx = document.getElementById('distanceChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Distance (cm)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update dashboard with new data
+        function updateDashboard(data) {
+            // Log received data for debugging
+            document.getElementById('debug').textContent = 'Received data: ' + JSON.stringify(data);
+
+            // Update current values
+            const distance = parseFloat(data.distance);
+            document.getElementById('currentDistance').textContent = distance.toFixed(1);
+            
+            const binStatusElement = document.getElementById('binStatus');
+            binStatusElement.textContent = data.bin_status;
+            binStatusElement.className = `bin-status status-${data.bin_status.toLowerCase()}`;
+            
+            // Update last update time
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = now.toLocaleTimeString();
+
+            // Update chart
+            chartData.labels.push(now.toLocaleTimeString());
+            chartData.datasets[0].data.push(distance);
+
+            // Remove old data points if exceeding maxDataPoints
+            if (chartData.labels.length > maxDataPoints) {
+                chartData.labels.shift();
+                chartData.datasets[0].data.shift();
+            }
+
+            chart.update();
+        }
+
+        // Fetch data from the server
+        async function fetchData() {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/bin_status_reports');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                updateDashboard(data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('debug').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Initialize chart and start data polling
+        document.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            // Fetch immediately on load
+            fetchData();
+            // Then poll every 2 seconds
+            setInterval(fetchData, 10000);
+        });
+    </script>
+</body>
+</html>

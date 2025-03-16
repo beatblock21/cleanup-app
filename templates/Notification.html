@@ -1,0 +1,18 @@
+<div class="notifications">
+    <h3>Notifications</h3>
+    <ul>
+        {% for notification in current_user.notifications %}
+            <li class="{% if not notification.is_read %}unread{% endif %}">
+                {{ notification.message }} - {{ notification.timestamp }}
+                <form action="{{ url_for('main.mark_notification_as_read', notification_id=notification.id) }}" method="POST">
+                    <button type="submit">Mark as read</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('main.notifications') }}">
+        Notifications <span class="badge">{{ current_user.notifications | selectattr('is_read', 'equalto', False) | list | length }}</span>
+    </a>
+    
+</div>

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="dashboard-container" style="background: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); width: 80%; max-width: 800px; margin: 0 auto; text-align: center;">
+    <h1 class="welcome-title" style="color: #4caf50; margin-bottom: 20px;">Welcome to the Cleanup App!</h1>
+    <p class="welcome-description" style="color: #555;">
+        Our goal is to help keep your environment clean by reporting litter hotspots and ensuring bins are managed efficiently.
+    </p>
+
+    {% if current_user.is_authenticated %}
+    <!-- Centered Widgets Section -->
+    <div class="widgets-container" style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+        <!-- User Reports Widget -->
+        <div class="widget widget-card shadow" style="background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); width: 48%; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+            <div class="card-body">
+                <h5 class="card-title" style="color: #4caf50; margin-bottom: 10px;">Your Reports</h5>
+                <p class="card-text" style="color: #555;">
+                    Litter Hotspots: <strong>{{ user_litter_reports }}</strong><br>
+                </p>
+            </div>
+        </div>
+        <!-- Community Stats Widget -->
+        <div class="widget widget-card shadow" style="background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); width: 48%; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+            <div class="card-body">
+                <h5 class="card-title" style="color: #4caf50; margin-bottom: 10px;">Community Impact</h5>
+                <p class="card-text" style="color: #555;">
+                    Total Reports: <strong>{{ total_reports }}</strong><br>
+                    Active Users: <strong>{{ active_users }}</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Centered Quick Actions -->
+    <div class="home-actions" style="margin-top: 20px;">
+        <h3 class="actions-title" style="color: #4caf50; margin-bottom: 10px;">Quick Actions</h3>
+        <div class="report-buttons-container" style="display: flex; justify-content: center; gap: 10px;">
+            <a href="{{ url_for('main.report_hotspot') }}" class="btn btn-primary report-hotspot" style="background-color: #4caf50; color: white; padding: 10px 20px; font-size: 1em; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease;">
+                <i class="fas fa-map-marker-alt"></i> Report Litter Hotspot
+            </a>
+        </div>
+    </div>
+    
+    {% else %}
+    <div class="home-info" style="margin-top: 20px; color: #555;">
+        <h3>Join the Community</h3>
+        <p>
+            To start helping your community, please <a href="{{ url_for('main.register') }}" style="color: #4caf50; text-decoration: none;">register</a> or <a href="{{ url_for('main.login') }}" style="color: #4caf50; text-decoration: none;">login</a>.
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

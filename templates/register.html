@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="width: 100%; max-width: 400px; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+    <div class="form-container" style="text-align: center;">
+        <h2 style="margin-bottom: 20px; color: #4a90e2;">Register</h2>
+
+        <!-- Display flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-messages" style="margin-bottom: 20px;">
+              {% for category, message in messages %}
+                <div class="alert {% if category == 'success' %}alert-success{% else %}alert-danger{% endif %}" style="padding: 10px; border-radius: 5px; margin-bottom: 10px; background-color: {{ 'd4edda' if category == 'success' else 'f8d7da' }}; color: {{ '155724' if category == 'success' else '721c24' }};">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Register form -->
+        <form action="{{ url_for('main.register') }}" method="POST">
+            {{ form.hidden_tag() }}  <!-- Automatically includes CSRF token -->
+
+            <div class="form-group" style="margin-bottom: 20px; text-align: left; position: relative;">
+                <label for="username" style="display: block; margin-bottom: 5px; color: #555;">Username</label>
+                <input type="text" id="username" name="username" class="form-control" required placeholder="Enter your username" style="width: calc(100% - 40px); padding: 10px 10px 10px 40px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; transition: border-color 0.3s ease;">
+                <span class="form-icon" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa; transition: color 0.3s ease;"><i class="fas fa-user"></i></span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px; text-align: left; position: relative;">
+                <label for="email" style="display: block; margin-bottom: 5px; color: #555;">Email</label>
+                <input type="email" id="email" name="email" class="form-control" required placeholder="Enter your email" style="width: calc(100% - 40px); padding: 10px 10px 10px 40px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; transition: border-color 0.3s ease;">
+                <span class="form-icon" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa; transition: color 0.3s ease;"><i class="fas fa-envelope"></i></span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px; text-align: left; position: relative;">
+                <label for="password" style="display: block; margin-bottom: 5px; color: #555;">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required placeholder="Enter your password" style="width: calc(100% - 40px); padding: 10px 10px 10px 40px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; transition: border-color 0.3s ease;">
+                <span class="form-icon" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #aaa; transition: color 0.3s ease;"><i class="fas fa-lock"></i></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="display: inline-block; background-color: #4a90e2; color: white; padding: 10px 20px; font-size: 1em; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease;">Register</button>
+        </form>
+
+        <p>Already have an account? <a href="{{ url_for('main.login') }}">Login here</a></p>
+    </div>
+</div>
+{% endblock %}

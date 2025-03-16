@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>View Hotspots</title>
+    <style>
+        /* Basic styling for the page */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        /* Flash messages */
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Card Layout for Reports */
+        .report-card {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background-color: #f9f9f9;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .report-info {
+            flex: 1;
+            padding-right: 15px;
+        }
+
+        .report-info h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .report-info p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .report-image {
+            max-width: 180px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .status {
+            font-weight: bold;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .status-pending {
+            background-color: #ffcc00;
+        }
+
+        .status-approved {
+            background-color: #28a745;
+        }
+
+        .approve-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .approve-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Reported Litter Hotspots</h2>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Display Hotspot Reports -->
+        {% if hotspots %}
+            {% for hotspot in hotspots %}
+                <div class="report-card">
+                    <div class="report-info">
+                        <h3>{{ hotspot.description }}</h3>
+                        <p><strong>Reported by:</strong> {{ hotspot.user.username }}</p>
+                        <p><strong>Location:</strong> {{ hotspot.location }}</p>
+                        <p><strong>Status:</strong> 
+                            <span class="status {{ 'status-pending' if hotspot.status == 'pending' else 'status-approved' }}">
+                                {{ hotspot.status.capitalize() }}
+                            </span>
+                        </p>
+                        <a href="{{ url_for('main.approve_report', hotspot_id=hotspot.id) }}" class="approve-btn">Approve</a>
+                    </div>
+                    <div>
+                        <img src="{{ hotspot.image_url }}" alt="Litter Evidence" class="report-image">
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No hotspots reported yet.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

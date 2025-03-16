@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bin Status Reports</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            cursor: pointer;
+        }
+        .full {
+            background-color: #ffcccc;
+        }
+        .half-full {
+            background-color: #fff2cc;
+        }
+        .empty {
+            background-color: #ccffcc;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bin Status Reports</h1>
+
+    <!-- Notifications Section -->
+    {% if current_user.unread_notifications_count > 0 %}
+    <div class="alert alert-info">
+        You have {{ current_user.unread_notifications_count }} unread notifications.
+    </div>
+    {% endif %}
+
+    <!-- Filter Form -->
+    <form method="GET" action="{{ url_for('main.filter_reports') }}">
+        <label for="status">Filter by Status:</label>
+        <select id="status" name="status">
+            <option value="">All</option>
+            <option value="FULL" {% if request.args.get('status') == 'FULL' %}selected{% endif %}>Full</option>
+            <option value="HALF-FULL" {% if request.args.get('status') == 'HALF-FULL' %}selected{% endif %}>Half-Full</option>
+            <option value="EMPTY" {% if request.args.get('status') == 'EMPTY' %}selected{% endif %}>Empty</option>
+        </select>
+
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" value="{{ request.args.get('date') }}">
+
+        <button type="submit">Filter</button>
+    </form>
+
+    <!-- Report Table -->
+    <table>
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">Bin Location</th>
+                <th onclick="sortTable(1)">Status</th>
+                <th onclick="sortTable(2)">Last Checked</th>
+                <th>Reported By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in bin_status_reports %}
+            <tr class="{{ report.status|lower }}">
+                <td>{{ report.bin_location }}</td>
+                <td>{{ report.status }}</td>
+                <td>{{ report.last_checked.strftime('%d-%m-%Y %H:%M') }}</td>
+                <td>{{ report.user.username }}</td>
+                <td class="actions">
+                    <!-- Dispatch Truck Button -->
+                    <form action="{{ url_for('main.dispatch_trucks', bin_id=report.id) }}" method="POST">
+                        <button type="submit">Dispatch Truck</button>
+                    </form>
+
+                    <!-- Mark Reviewed Button -->
+                    <form action="{{ url_for('main.mark_reviewed', report_id=report.id) }}" method="POST">
+                        <button type="submit">Mark Reviewed</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Real-time Data Fetching Script -->
+    <script>
+        function fetchBinStatusReports() {
+            fetch("{{ url_for('main.get_bin_status_reports') }}")
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.querySelector('table tbody');
+                    tableBody.innerHTML = ''; // Clear the table before updating
+                    
+                    data.forEach(report => {
+                        const row = document.createElement('tr');
+                        row.classList.add(report.status.toLowerCase());  // Add class based on status
+                        
+                        row.innerHTML = `
+                            <td>${report.bin_location}</td>
+                            <td>${report.status}</td>
+                            <td>${report.last_checked}</td>
+                            <td>${report.user}</td>
+                            <td class="actions">
+                                <form action="{{ url_for('main.dispatch_trucks') }}" method="POST">
+                                    <input type="hidden" name="bin_id" value="${report.id}">
+                                    <button type="submit">Dispatch Truck</button>
+                                </form>
+                                <form action="{{ url_for('main.mark_reviewed', report_id=report.id) }}" method="POST">
+                                    <button type="submit">Mark Reviewed</button>
+                                </form>
+                            </td>
+                        `;
+                        
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching bin status reports:', error));
+        }
+
+        // Automatically fetch the reports on page load
+        window.onload = fetchBinStatusReports;
+    </script>
+</body>
+</html>
